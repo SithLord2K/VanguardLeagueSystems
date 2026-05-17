@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="VanguardLeagueSystems.Application/VanguardLeagueSystems.Application.csproj" />
+  <Project Path="VanguardLeagueSystems.Domain/VanguardLeagueSystems.Domain.csproj" />
+  <Project Path="VanguardLeagueSystems.Infrastructure/VanguardLeagueSystems.Infrastructure.csproj" />
+  <Project Path="VanguardLeagueSystems.UI/VanguardLeagueSystems.UI.Client/VanguardLeagueSystems.UI.Client.csproj" />
+  <Project Path="VanguardLeagueSystems.UI/VanguardLeagueSystems.UI/VanguardLeagueSystems.UI.csproj" />
+</Solution>
