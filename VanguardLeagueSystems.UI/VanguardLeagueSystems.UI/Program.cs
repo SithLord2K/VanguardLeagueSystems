@@ -1,9 +1,14 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor.Services;
+using VanguardLeagueSystems.Application.Interfaces;
+using VanguardLeagueSystems.Application.Services;
+using VanguardLeagueSystems.Domain.Entities;
+using VanguardLeagueSystems.Infrastructure.Persistence;
+using VanguardLeagueSystems.Infrastructure.Security;
 using VanguardLeagueSystems.UI.Components;
 using VanguardLeagueSystems.UI.Components.Account;
-using VanguardLeagueSystems.UI.Data;
 
 namespace VanguardLeagueSystems.UI
 {
@@ -23,6 +28,29 @@ namespace VanguardLeagueSystems.UI
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+            // 1. Register the Tenant Provider (Scoped so it lives for the duration of the user's circuit)
+            builder.Services.AddScoped<CurrentTenantProvider>();
+
+            // 2. Register the Database Context
+            builder.Services.AddDbContext<VanguardDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // Add MudBlazor Services
+            builder.Services.AddMudServices();
+
+            // --- Application Services ---
+            builder.Services.AddScoped<ILeagueService, LeagueService>();
+            builder.Services.AddScoped<ISeasonService, SeasonService>();
+            builder.Services.AddScoped<ITeamService, TeamService>();
+            builder.Services.AddScoped<IPlayerService, PlayerService>();
+            builder.Services.AddScoped<IRosterService, RosterService>();
+            builder.Services.AddScoped<ILeagueService, LeagueService>();
+
+            builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<ApplicationRole>() // Wire up your dynamic roles!
+                .AddEntityFrameworkStores<VanguardDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
+
             builder.Services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -31,20 +59,7 @@ namespace VanguardLeagueSystems.UI
                 .AddIdentityCookies();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-            builder.Services.AddIdentityCore<ApplicationUser>(options =>
-                {
-                    options.SignIn.RequireConfirmedAccount = true;
-                    options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
-                })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
-
-            builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             var app = builder.Build();
 

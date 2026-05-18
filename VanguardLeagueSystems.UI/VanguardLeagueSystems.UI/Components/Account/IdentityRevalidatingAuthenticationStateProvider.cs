@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
-using VanguardLeagueSystems.UI.Data;
+using VanguardLeagueSystems.Domain.Entities;
 
 namespace VanguardLeagueSystems.UI.Components.Account
 {

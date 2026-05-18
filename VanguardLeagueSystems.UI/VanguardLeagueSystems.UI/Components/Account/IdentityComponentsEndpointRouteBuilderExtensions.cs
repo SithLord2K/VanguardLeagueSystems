@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using VanguardLeagueSystems.UI.Components.Account.Pages;
 using VanguardLeagueSystems.UI.Components.Account.Pages.Manage;
-using VanguardLeagueSystems.UI.Data;
+using VanguardLeagueSystems.Domain.Entities;
 
 namespace Microsoft.AspNetCore.Routing
 {

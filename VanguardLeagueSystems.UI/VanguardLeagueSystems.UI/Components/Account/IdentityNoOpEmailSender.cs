@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using VanguardLeagueSystems.UI.Data;
+using VanguardLeagueSystems.Domain.Entities;
 
 namespace VanguardLeagueSystems.UI.Components.Account
 {

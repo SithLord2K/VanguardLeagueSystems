@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\VanguardLeagueSystems.Application\VanguardLeagueSystems.Application.csproj" />
+    <ProjectReference Include="..\..\VanguardLeagueSystems.Domain\VanguardLeagueSystems.Domain.csproj" />
+    <ProjectReference Include="..\..\VanguardLeagueSystems.Infrastructure\VanguardLeagueSystems.Infrastructure.csproj" />
     <ProjectReference Include="..\VanguardLeagueSystems.UI.Client\VanguardLeagueSystems.UI.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.8" />
@@ -16,6 +19,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8" PrivateAssets="all" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8" />
+    <PackageReference Include="MudBlazor" Version="9.4.0" />
   </ItemGroup>
 
 </Project>

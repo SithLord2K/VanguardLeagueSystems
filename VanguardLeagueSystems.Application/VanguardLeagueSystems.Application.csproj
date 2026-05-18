@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\VanguardLeagueSystems.Domain\VanguardLeagueSystems.Domain.csproj" />
+    <ProjectReference Include="..\VanguardLeagueSystems.Infrastructure\VanguardLeagueSystems.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

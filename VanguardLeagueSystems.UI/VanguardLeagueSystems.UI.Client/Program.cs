@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor.Services;
 
 namespace VanguardLeagueSystems.UI.Client
 {
@@ -11,7 +12,7 @@ namespace VanguardLeagueSystems.UI.Client
             builder.Services.AddAuthorizationCore();
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddAuthenticationStateDeserialization();
-
+            builder.Services.AddMudServices();
             await builder.Build().RunAsync();
         }
     }
