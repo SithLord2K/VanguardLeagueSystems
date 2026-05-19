@@ -14,7 +14,7 @@ namespace VanguardLeagueSystems.UI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -97,6 +97,33 @@ namespace VanguardLeagueSystems.UI
 
             // Add additional endpoints required by the Identity /Account Razor components.
             app.MapAdditionalIdentityEndpoints();
+
+            // --- PLATFORM ADMIN INITIALIZATION ---
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+                // 1. Ensure the PlatformAdmin role exists
+                if (!await roleManager.RoleExistsAsync("PlatformAdmin"))
+                {
+                    // Platform roles belong to the system, so we assign an Empty Guid for the TenantId
+                    await roleManager.CreateAsync(new ApplicationRole
+                    {
+                        Name = "PlatformAdmin",
+                        TenantId = Guid.Empty
+                    });
+                }
+
+                // 2. Elevate the master admin account
+                var masterEmail = "wileysoftware@gmail.com";
+                var adminUser = await userManager.FindByEmailAsync(masterEmail);
+
+                if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "PlatformAdmin"))
+                {
+                    await userManager.AddToRoleAsync(adminUser, "PlatformAdmin");
+                }
+            }
 
             app.Run();
         }
