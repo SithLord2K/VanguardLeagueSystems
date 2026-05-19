@@ -13,6 +13,19 @@
             Vanguard League Systems
         </MudText>
         <MudSpacer />
+        
+        <!-- Conditionally render the impersonation warning using standard AuthState -->
+        <AuthorizeView>
+            <Authorized>
+                @if (context.User.HasClaim(c => c.Type == "ImpersonatorMode" && c.Value == "Active"))
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" Class="mr-4" Href="Account/Logout">
+                        Exit Impersonation
+                    </MudButton>
+                }
+            </Authorized>
+        </AuthorizeView>
+        
         <MudButton Variant="Variant.Outlined" Color="Color.Primary" Href="Account/Login" Size="Size.Small">
             Sign In
         </MudButton>
@@ -28,6 +41,18 @@
             <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Dashboard">Dashboard</MudNavLink>
             <MudNavLink Href="/leagues" Icon="@Icons.Material.Filled.EmojiEvents">Leagues</MudNavLink>
             <MudNavLink Href="/teams" Icon="@Icons.Material.Filled.Groups">Teams & Rosters</MudNavLink>
+            
+            <AuthorizeView Roles="PlatformAdmin">
+                <Authorized>
+                    <MudDivider Class="my-2" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="px-4 font-weight-bold text-transform-uppercase">
+                        System Core
+                    </MudText>
+                    <MudNavLink Href="/platform-admin/dashboard" Icon="@Icons.Material.Filled.Terminal" IconColor="Color.Error">
+                        Platform Console
+                    </MudNavLink>
+                </Authorized>
+            </AuthorizeView>
         </MudNavMenu>
     </MudDrawer>
 
@@ -46,41 +71,35 @@
         _drawerOpen = !_drawerOpen;
     }
 
-    // --- The Professional SaaS Theme ---
     private MudTheme _vanguardTheme = new MudTheme()
     {
         PaletteDark = new PaletteDark()
         {
-            // Core UI Colors (Deep Slate/Navy instead of void black)
-            Background = "#0f172a",      // Tailwind Slate 900
-            AppbarBackground = "#1e293b",// Tailwind Slate 800
+            Background = "#0f172a",      
+            AppbarBackground = "#1e293b",
             DrawerBackground = "#0f172a",
-            Surface = "#1e293b",         // Cards and panels
-
-            // Brand & Accent Colors
-            Primary = "#3b82f6",         // Professional Royal Blue
-            Secondary = "#10b981",       // Success Green (great for active stats)
-            Tertiary = "#f59e0b",        // Warning Orange
-
-            // Text & Lines
-            TextPrimary = "#f8fafc",
-            TextSecondary = "#94a3b8",
-            ActionDefault = "#cbd5e1",   // Soft grey for inactive icons
-            Divider = "#334155"          // Subtle structural lines
+            Surface = "#1e293b",         
+            Primary = "#3b82f6",         
+            Secondary = "#10b981",       
+            Tertiary = "#f59e0b",        
+            TextPrimary = "#f8fafc",     
+            TextSecondary = "#94a3b8",   
+            ActionDefault = "#cbd5e1",   
+            Divider = "#334155"          
         },
         LayoutProperties = new LayoutProperties()
         {
-            DefaultBorderRadius = "6px", // Soft, approachable, modern corners
+            DefaultBorderRadius = "6px", 
             AppbarHeight = "64px"
         },
         Typography = new Typography()
         {
-            Default = new DefaultTypography()
+            Default = new DefaultTypography() 
             {
-                FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif" },
+                FontFamily = new[] { "Roboto", "Helvetica", "Arial", "sans-serif" }, 
                 FontSize = "0.875rem",
-                FontWeight = "400",
-                LineHeight = "1.43",
+                FontWeight = "400",   
+                LineHeight = "1.43",  
                 LetterSpacing = ".01071em"
             }
         }

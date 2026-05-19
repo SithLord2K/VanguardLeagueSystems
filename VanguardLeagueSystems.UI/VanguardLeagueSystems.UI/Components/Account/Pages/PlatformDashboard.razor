@@ -1,0 +1,184 @@
+﻿@page "/platform-admin/dashboard"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using VanguardLeagueSystems.Application.DTOs
+@using VanguardLeagueSystems.Application.Interfaces
+@using VanguardLeagueSystems.Infrastructure.Security
+@attribute [Authorize(Roles = "PlatformAdmin")]
+@inject IPlatformAdminService PlatformAdminService
+@inject ImpersonationManager ImpersonationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Platform Console | Vanguard League Systems</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <div class="mb-6">
+        <MudText Typo="Typo.h4" Style="font-weight: 700;" Color="Color.Primary">Platform Infrastructure Console</MudText>
+        <MudText Typo="Typo.body1" Color="Color.Secondary">Global system health, multi-tenant boundaries, and administrative account controls.</MudText>
+        <MudDivider Class="my-4" />
+    </div>
+
+    @if (_data == null)
+    {
+        <div class="d-flex justify-center align-center" style="height: 200px;">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <MudGrid Class="mb-6">
+            <MudItem Xs="12" Sm="4">
+                <MudPaper Class="pa-6" Elevation="1">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Total Active Tenants</MudText>
+                    <MudText Typo="Typo.h3" Style="font-weight: 700;">@_data.TotalTenants</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem Xs="12" Sm="4">
+                <MudPaper Class="pa-6" Elevation="1">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Global Managed Leagues</MudText>
+                    <MudText Typo="Typo.h3" Style="font-weight: 700;" Color="Color.Primary">@_data.TotalActiveLeagues</MudText>
+                </MudPaper>
+            </MudItem>
+            <MudItem Xs="12" Sm="4">
+                <MudPaper Class="pa-6" Elevation="1">
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Total Tracked Athletes</MudText>
+                    <MudText Typo="Typo.h3" Style="font-weight: 700;" Color="Color.Secondary">@_data.TotalPlayers</MudText>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+
+        <MudGrid>
+            <MudItem Xs="12" Md="7">
+                <MudTable Items="@_data.SystemTenants" Hover="true" Elevation="1" Dense="true" T="TenantManagementDto" SelectedItemChanged="OnTenantSelected">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6" Style="font-weight: 600;">System Tenant Registry</MudText>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>Organization Name</MudTh>
+                        <MudTh>Subscription</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh Style="text-align: right;">Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Organization Name" Style="font-weight: 500; cursor: pointer;">@context.Name</MudTd>
+                        <MudTd DataLabel="Subscription">@context.Tier</MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudChip T="string" Size="Size.Small" Color="@(context.Status == "Active" ? Color.Secondary : Color.Error)" Variant="Variant.Filled">
+                                @context.Status
+                            </MudChip>
+                        </MudTd>
+                        <MudTd DataLabel="Actions" Style="text-align: right;">
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" OnClick="@(() => LoadUsersAsync(context.Id, context.Name))">Users</MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudItem>
+
+            <MudItem Xs="12" Md="5">
+                <MudPaper Class="pa-4" Elevation="1" Style="min-height: 250px;">
+                    <MudText Typo="Typo.h6" Style="font-weight: 600;" Class="mb-4">
+                        @(_selectedTenantName ?? "Select an Organization")
+                    </MudText>
+
+                    @if (_isUsersLoading)
+                    {
+                        <div class="d-flex justify-center align-center" style="height: 100px;">
+                            <MudProgressCircular Color="Color.Primary" Size="Size.Small" Indeterminate="true" />
+                        </div>
+                    }
+                    else if (_tenantUsers == null)
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="italic">Click "Users" on any active tenant registry line to audit access profiles or trigger live system impersonation.</MudText>
+                    }
+                    else if (!_tenantUsers.Any())
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Error">No accounts found in this tenant boundary context.</MudText>
+                    }
+                    else
+                    {
+                        <MudList T="UserManagementDto" Dense="true">
+                            @foreach (var user in _tenantUsers)
+                            {
+                                <MudListItem>
+                                    <div class="d-flex align-center justify-space-between w-100">
+                                        <div>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">@user.FirstName @user.LastName</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">@user.Email</MudText>
+                                            <div class="mt-1">
+                                                @foreach (var role in user.Roles)
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" Class="mr-1">@role</MudChip>
+                                                }
+                                            </div>
+                                        </div>
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Tertiary" Size="Size.Small" OnClick="@(() => ExecuteImpersonation(user))">
+                                            Act As
+                                        </MudButton>
+                                    </div>
+                                </MudListItem>
+                                <MudDivider />
+                            }
+                        </MudList>
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private PlatformDashboardDto? _data;
+    private List<UserManagementDto>? _tenantUsers;
+    private string? _selectedTenantName;
+    private bool _isUsersLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMetricsAsync();
+    }
+
+    private async Task LoadMetricsAsync()
+    {
+        _data = await PlatformAdminService.GetPlatformMetricsAsync();
+    }
+
+    private void OnTenantSelected(TenantManagementDto tenant)
+    {
+        if (tenant != null)
+        {
+            _ = LoadUsersAsync(tenant.Id, tenant.Name);
+        }
+    }
+
+    private async Task LoadUsersAsync(Guid tenantId, string tenantName)
+    {
+        _isUsersLoading = true;
+        _selectedTenantName = tenantName;
+        _tenantUsers = await PlatformAdminService.GetTenantUsersAsync(tenantId);
+        _isUsersLoading = false;
+        StateHasChanged();
+    }
+
+    private void ExecuteImpersonation(UserManagementDto targetUser)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, targetUser.Id.ToString()),
+            new Claim(ClaimTypes.Name, targetUser.Email),
+            new Claim(ClaimTypes.Email, targetUser.Email),
+            new Claim("TenantId", targetUser.TenantId.ToString()),
+            new Claim("ImpersonatorMode", "Active")
+        };
+
+        foreach (var role in targetUser.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var identity = new ClaimsIdentity(claims, "VanguardImpersonationAuth");
+        var principal = new ClaimsPrincipal(identity);
+
+        ImpersonationManager.StartImpersonation(principal);
+        Snackbar.Add($"Context swapped. Operating as {targetUser.Email}", Severity.Warning);
+    }
+}

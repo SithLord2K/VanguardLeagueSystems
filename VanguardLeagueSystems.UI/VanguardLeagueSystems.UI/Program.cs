@@ -30,6 +30,14 @@ namespace VanguardLeagueSystems.UI
 
             // 1. Register the Tenant Provider (Scoped so it lives for the duration of the user's circuit)
             builder.Services.AddScoped<CurrentTenantProvider>();
+            builder.Services.AddScoped<ImpersonationManager>();
+            builder.Services.AddScoped<IdentityRevalidatingAuthenticationStateProvider>();
+
+            // Intercept and decorate the primary AuthenticationStateProvider registration
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+                new ImpersonatingAuthenticationStateProvider(
+                    sp.GetRequiredService<IdentityRevalidatingAuthenticationStateProvider>(),
+                    sp.GetRequiredService<ImpersonationManager>()));
 
             // 2. Register the Database Context
             builder.Services.AddDbContext<VanguardDbContext>(options =>
